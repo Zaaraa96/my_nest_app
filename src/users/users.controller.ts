@@ -1,22 +1,28 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, UseInterceptors } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { serialize } from 'src/interceptors/serialize.interceptor';
+import { UserDto } from './dtos/user.dto';
 
 @ApiTags('User')
+@serialize(UserDto)
 @Controller('auth')
 export class UsersController {
     constructor(private userService: UsersService){}
     @Post('/signup')
     createUser(@Body() body:CreateUserDto){
-       console.log(body) 
        return this.userService.create(body.email,body.password);
     }
 
+    
     @Get('/:id')
-    findUser(@Param('id') id:string){
-        return this.userService.findOne(parseInt(id));
+    async findUser(@Param('id') id:string){
+        const user = await this.userService.findOne(parseInt(id));
+        if(!user)
+        throw new NotFoundException('user not found');
+        return user;
     }
 
     @Get()
@@ -30,8 +36,7 @@ export class UsersController {
     }
 
     @Patch('/:id')
-    updateUser(@Param('id') id: string,@Body() body:UpdateUserDto){
-       console.log(body) 
+    updateUser(@Param('id') id: string,@Body() body:UpdateUserDto){ 
        return this.userService.update(parseInt(id),body);
     }
 }
