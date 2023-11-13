@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, Session, UseInterceptors } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -7,19 +7,44 @@ import { serialize } from 'src/interceptors/serialize.interceptor';
 import { UserDto } from './dtos/user.dto';
 import { AuthService } from './auth.service';
 
+interface UserSession{
+    userId:number;
+}
+
 @ApiTags('User')
 @serialize(UserDto)
 @Controller('auth')
 export class UsersController {
     constructor(private userService: UsersService, private authService: AuthService){}
     @Post('/signup')
-    createUser(@Body() body:CreateUserDto){
-       return this.authService.signup(body.email,body.password);
+    async createUser(@Body() body:CreateUserDto ,@Session() session:UserSession){
+       const user = await this.authService.signup(body.email,body.password);
+       session.userId = user.id;
+        return user;
+    }
+
+
+
+    @Post('/signout')
+    async signOutUser(@Session() session: UserSession){
+        session.userId = null;
     }
 
     @Post('/signin')
-    signUser(@Body() body:CreateUserDto){
-       return this.authService.signin(body.email,body.password);
+    async signUser(@Body() body:CreateUserDto ,@Session() session: UserSession){
+        const user = await this.authService.signin(body.email,body.password);
+        session.userId = user.id;
+        return user;
+    }
+
+    @Get('/whoami')
+    async whoAmI(@Session() session:UserSession){
+        console.log(session);
+        const user = await this.userService.findOne(session.userId);
+        if(!user)
+        throw new BadRequestException('user not signed in');
+        return user;
+        // return this.userService.findOne(session.userId);
     }
     
     @Get('/:id')
