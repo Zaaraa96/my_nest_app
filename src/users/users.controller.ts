@@ -6,10 +6,12 @@ import { UpdateUserDto } from './dtos/update-user.dto';
 import { serialize } from 'src/interceptors/serialize.interceptor';
 import { UserDto } from './dtos/user.dto';
 import { AuthService } from './auth.service';
+import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { UserSession } from './interfaces/user-session.interface';
+import { CurrentUserInterceptor } from './interceptors/current-user.interceptor';
+import { User } from './user.entity';
 
-interface UserSession{
-    userId:number;
-}
+
 
 @ApiTags('User')
 @serialize(UserDto)
@@ -37,14 +39,14 @@ export class UsersController {
         return user;
     }
 
+    @UseInterceptors(CurrentUserInterceptor)
     @Get('/whoami')
-    async whoAmI(@Session() session:UserSession){
-        console.log(session);
+    async whoAmI(@CurrentUser() currentUser: User,@Session() session:UserSession){
+        console.log(currentUser);
         const user = await this.userService.findOne(session.userId);
         if(!user)
         throw new BadRequestException('user not signed in');
         return user;
-        // return this.userService.findOne(session.userId);
     }
     
     @Get('/:id')

@@ -4,6 +4,7 @@ import { UsersService } from './users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './user.entity';
 import { AuthService } from './auth.service';
+import { CurrentUserInterceptor } from './interceptors/current-user.interceptor';
 
 
 @Module({
@@ -11,6 +12,6 @@ import { AuthService } from './auth.service';
     TypeOrmModule.forFeature([User]) //this creates the repository for us
   ],
   controllers: [UsersController],
-  providers: [UsersService, AuthService]
+  providers: [UsersService, AuthService,  CurrentUserInterceptor]
 })
 export class UsersModule {}
