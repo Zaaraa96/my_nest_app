@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, Session, UseInterceptors } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, NotFoundException, Param, Patch, Post, Query, Session, UseGuards, UseInterceptors } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { UsersService } from './users.service';
@@ -10,6 +10,7 @@ import { CurrentUser } from 'src/decorators/current-user.decorator';
 import { UserSession } from './interfaces/user-session.interface';
 import { CurrentUserInterceptor } from './interceptors/current-user.interceptor';
 import { User } from './user.entity';
+import { AuthGuard } from 'src/guards/auth.guard';
 
 
 
@@ -67,6 +68,7 @@ export class UsersController {
         return this.userService.remove(parseInt(id));
     }
 
+    @UseGuards(AuthGuard)
     @Patch('/:id')
     updateUser(@Param('id') id: string,@Body() body:UpdateUserDto){ 
        return this.userService.update(parseInt(id),body);
