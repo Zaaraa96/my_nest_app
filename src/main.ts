@@ -1,19 +1,12 @@
 import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AllExceptionsFilter, ErroFilter, HttpExceptionFilter } from './utils/http_exception_handler';
 
-const cookieSession = require('cookie-session'); 
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true
-    })
-  );
-  app.use(cookieSession({keys:['asdfghj']}));
+
   const options = new DocumentBuilder()
   .setTitle('Your API Title')
   .setDescription('Your API description')
