@@ -23,6 +23,15 @@ export function serialize(dto:any){
           excludeExtraneousValues: true,
         });
       }),
-    );
+    )
+    .pipe(
+      map((data) => ({
+        statusCode: context.switchToHttp().getResponse().statusCode,
+        // message: data.message,
+        timestamp: new Date().toISOString(),
+        data: data,
+      })),
+    )
+    ;
   }
 }

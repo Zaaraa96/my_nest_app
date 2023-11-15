@@ -8,6 +8,7 @@ import { User } from './users/user.entity';
 import { Report } from './reports/report.entity';
 import { APP_PIPE } from '@nestjs/core';
 import {ConfigModule, ConfigService } from '@nestjs/config';
+import { GeneralResponseMiddleware } from './middlewares/general';
 
 const cookieSession = require('cookie-session'); 
 
@@ -44,6 +45,9 @@ export class AppModule {
     consumer.apply(
       cookieSession({keys:['asdfghj']})
     ).forRoutes('*');
+    consumer
+      .apply(GeneralResponseMiddleware)
+      .forRoutes('*');
   }
 }
 

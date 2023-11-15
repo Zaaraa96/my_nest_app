@@ -1,5 +1,5 @@
 import { ExecutionContext, createParamDecorator } from "@nestjs/common";
-import { User } from "src/users/user.entity";
+import { User } from "../users/user.entity";
 
 interface RequestWithCurrentUser{
     currentUser: User;
