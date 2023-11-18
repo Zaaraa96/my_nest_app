@@ -9,6 +9,7 @@ import { Report } from './reports/report.entity';
 import { APP_PIPE } from '@nestjs/core';
 import {ConfigModule, ConfigService } from '@nestjs/config';
 import { GeneralResponseMiddleware } from './middlewares/general';
+import dbConfig from './config/db.config';
 
 const cookieSession = require('cookie-session'); 
 
@@ -16,19 +17,15 @@ const cookieSession = require('cookie-session');
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV}`
+      envFilePath: `.env.${process.env.NODE_ENV}`,
+      load: [dbConfig],
     }),
+    // TypeOrmModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) =>{
-          return {
-              type: 'sqlite',
-              database: config.get<string>('DB_NAME'),
-              entities:[User, Report],
-              synchronize: true, //only for development
-            }
-          
-      },
+      useFactory: async (configService: ConfigService) => ({
+        ...(await configService.get('database')),
+      }),
     }),
     UsersModule, ReportsModule],
   controllers: [AppController],
